@@ -1,0 +1,21 @@
+{
+  "name": "grow-web-service",
+  "version": "1.0.0",
+  "description": "Chat Web Application Frontend",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "pip install -r requirements.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrlannigan/grow-web-service.git"
+  },
+  "author": "Julian Lannigan <julian.lannigan@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mrlannigan/grow-web-service/issues"
+  },
+  "homepage": "https://github.com/mrlannigan/grow-web-service#readme"
+}
