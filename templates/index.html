@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Grow developer test</title>
+		<meta name="description" content="Grow developer test" />
+		<style>
+			body {
+			  background: #efeeea;
+			  font-family: Helvetica;
+			  color: #3a3532;
+			  font-size: 14px;
+			  line-height: 18px;
+			  background-size: 20px 20px;
+			  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0) 90%, rgba(47, 43, 40, 0.075) 98%);
+			  background-image: linear-gradient(to right, rgba(0, 0, 0, 0) 90%, rgba(47, 43, 40, 0.075) 98%);
+			}
+
+			.current_rooms_list:before, .current_rooms_list:after, #chat_room:before, #chat_room:after {
+			  content: "";
+			  display: table;
+			}
+			.current_rooms_list:after, #chat_room:after {
+			  clear: both;
+			}
+
+			* {
+			  box-sizing: border-box;
+			}
+
+			.hidden {
+			  display: none;
+			}
+
+			button, input {
+			  border: none;
+			  box-shadow: none;
+			  border-radius: 5px;
+			}
+
+			button {
+			  color: white;
+			  background: #b25538;
+			  text-transform: uppercase;
+			  cursor: pointer;
+			}
+
+			input {
+			  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.1);
+			}
+
+			ul {
+			  list-style: none;
+			  margin: 0;
+			  padding: 0;
+			}
+
+			[id^="modal"] {
+			  position: absolute;
+			  width: 500px;
+			  left: 50%;
+			  margin-left: -250px;
+			  top: 20vh;
+			  padding: 5vh 0;
+			  text-align: center;
+			  background: #efeeea;
+			  border: solid 2px #2f2b28;
+			  border-radius: 3px;
+			}
+			[id^="modal"] button, [id^="modal"] input {
+			  font-size: 15px;
+			  line-height: 45px;
+			  height: 45px;
+			}
+			[id^="modal"] button {
+			  padding: 0 25px;
+			}
+			[id^="modal"]:not(.hidden) {
+			  z-index: 1000;
+			}
+			[id^="modal"] input {
+			  padding: 0 10px;
+			  margin-right: 5px;
+			}
+
+			#shadow_cover {
+			  position: fixed;
+			  top: 0;
+			  left: 0;
+			  right: 0;
+			  bottom: 0;
+			  background: rgba(0, 0, 0, 0.85);
+			  z-index: 1;
+			}
+
+			#create_new_room {
+			  cursor: pointer;
+			}
+
+			#chat_room {
+			  padding: 100px;
+			}
+			#chat_room .user_list, #chat_room .main {
+			  float: left;
+			}
+			#chat_room .user_list {
+			  width: 20%;
+			  background: white;
+			  padding: 25px;
+			  border-radius: 5px;
+			}
+			#chat_room .user_list .header {
+			  font-size: 20px;
+			  margin-bottom: 15px;
+			}
+			#chat_room .user_list li {
+			  text-overflow: ellipsis;
+			  overflow: hidden;
+			  width: 100%;
+			  line-height: 20px;
+			  font-style: italic;
+			}
+			#chat_room .user_list li:not(:last-of-type) {
+			  margin-bottom: 5px;
+			}
+			#chat_room .main {
+			  width: 80%;
+			  padding-right: 50px;
+			}
+			#chat_room .main .current_rooms_list {
+			  text-align: right;
+			}
+			#chat_room .main .current_rooms_list li {
+			  cursor: pointer;
+			  float: right;
+			  background: white;
+			  font-size: 16px;
+			  padding: 0 20px;
+			  line-height: 40px;
+			  height: 40px;
+			  border-radius: 5px 5px 0 0;
+			  margin-left: 5px;
+			}
+			#chat_room .main .current_rooms_list li.active {
+			  background: #b25538;
+			  color: white;
+			}
+			#chat_room .main .messages_window {
+			  background: white;
+			  padding: 30px;
+			  border-top: solid 3px #b25538;
+			  box-shadow: 0 0 0 -1px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.1);
+			  height: 60vh;
+			}
+			#chat_room .main .messages_window ul {
+			  overflow: scroll;
+			  height: 100%;
+			}
+			#chat_room .main .messages_window .messages_list_item {
+			  white-space: nowrap;
+			  position: relative;
+			}
+			#chat_room .main .messages_window .messages_list_item .avatar {
+			  width: 40px;
+			  height: 40px;
+			  border-radius: 50%;
+			  position: absolute;
+			  background-image: url("https://lh6.googleusercontent.com/-donwm0Gzz4o/AAAAAAAAAAI/AAAAAAAACH8/k0Yv6D2ynz4/s46-c-k-no/photo.jpg");
+			}
+			#chat_room .main .messages_window .messages_list_item .avatar, #chat_room .main .messages_window .messages_list_item .message {
+			  display: inline-block;
+			  vertical-align: top;
+			}
+			#chat_room .main .messages_window .messages_list_item .user {
+			  font-style: italic;
+			  color: #9a9089;
+			  font-size: 12px;
+			  margin-left: 55px;
+			}
+			#chat_room .main .messages_window .messages_list_item .message {
+			  width: calc(100% - 40px);
+			  padding-left: 55px;
+			  white-space: normal;
+			  margin-bottom: 5px;
+			}
+			#chat_room .main .messages_window .messages_list_item:not(:last-of-type) {
+			  margin-bottom: 25px;
+			}
+			#chat_room .main .messages_window [data-user="Ricky"] .avatar {
+			  background-image: url("https://lh3.googleusercontent.com/-zoJpQbS_9J4/AAAAAAAAAAI/AAAAAAAAAB8/hnGrLLKheU4/s46-c-k-no/photo.jpg");
+			}
+			#chat_room .main .messages_window [data-user="Nathan"] .avatar {
+			  background-image: url("https://lh3.googleusercontent.com/-6Cv5f2PzcZc/AAAAAAAAAAI/AAAAAAAAAFE/-dM0v2gsyO4/s46-c-k-no/photo.jpg");
+			}
+			#chat_room .main .entry_field {
+			  margin-top: 15px;
+			}
+			#chat_room .main .entry_field input, #chat_room .main .entry_field button {
+			  float: left;
+			  font-size: 18px;
+			  line-height: 50px;
+			  height: 50px;
+			}
+			#chat_room .main .entry_field input {
+			  width: 70%;
+			  padding: 0 15px;
+			}
+			#chat_room .main .entry_field button {
+			  float: right;
+			  width: calc(30% - 12px);
+			}
+		</style>
+	</head>
+	<body>
+		<div id="shadow_cover"></div>
+		<div id="modal_login">
+			<button id="login_button">Login</button>
+		</div>
+		<div class="hidden" id="modal_create_room">
+			<form id="create_room_form">
+				<input type="text" placeholder="Enter room name">
+				<button type="submit" id="create_room_button">Create</button>
+			</form>
+		</div>
+		<div class="hidden" id="chat_room">
+			<div class="main">
+				<ul class="current_rooms_list">
+					<li class="current_rooms_list_item active">Global</li>
+					<li id="create_new_room" class="current_rooms_list_item">+</li>
+				</ul>
+				<div class="messages_window">
+					<ul class="messages_list">
+						<li class="messages_list_item" data-user="Nathan">
+							<div class="avatar"></div>
+							<div class="message">Hey Ricky!</div>
+							<div class="user">Nathan W.</div>
+						</li>
+						<li class="messages_list_item" data-user="Ricky">
+							<div class="avatar"></div>
+							<div class="message">Hey Nathan!</div>
+							<div class="user">Ricky W.</div>
+						</li>
+					</ul>
+				</div>
+				<form id="submit_message_form" class="entry_field">
+					<input type="text" placeholder="Say something">
+					<button id="submit_message_button">Submit</button>
+				</form>
+			</div>
+			<ul class="user_list">
+				<div class="header">Chatters</div>
+				<li class="user_list_item">Ricky W.</li>
+				<li class="user_list_item">Brian W.</li>
+				<li class="user_list_item">Nathan W.</li>
+			</ul>
+		</div>
+	</body>
+	<script>
+		// candidate will need to modify the following functions
+		var login = function() {
+
+			loginComplete();
+		}
+
+		var createRoom = function() {
+
+			createRoomComplete();
+		}
+
+		var submitMessage = function() {
+
+			submitMessageComplete();
+		}
+
+		// candididate will call the following functions
+		var loginComplete = function() {
+			document.getElementById("chat_room").className = "";
+			closeModal();
+		}
+
+		var createRoomComplete = function() {
+			var roomName = document.getElementById("create_room_form").querySelector("input").value;
+
+			[].forEach.call(document.querySelectorAll(".current_rooms_list_item"), function(element) {
+				element.className = "current_rooms_list_item";
+			});
+			document.getElementById("create_new_room").insertAdjacentHTML("beforebegin", "<li class='current_rooms_list_item active'>" + roomName + "</li>");
+			closeModal();
+		}
+
+		var submitMessageComplete = function() {
+			var message = document.getElementById("submit_message_form").querySelector("input").value;
+
+			// stub
+			var user = {
+				name: "Candidate X."
+			}
+
+			document.getElementById("chat_room").querySelector(".messages_list").insertAdjacentHTML("beforeend",
+				"<li class='messages_list_item' data-user='" +
+					user.name.replace(" ", "_") +
+				"'><div class='avatar'></div><div class='message'>" +
+					message +
+				"</div><div class='user'>" +
+					user.name +
+				"</div></li>"
+			);
+		}
+
+		// candidate can ignore everything below
+		var closeModal = function() {
+			document.getElementById("shadow_cover").className = "hidden";
+			document.querySelector("[id^='modal']:not(.hidden)").className = "hidden";
+		}
+
+		var launchModal = function(modalId) {
+			document.getElementById("shadow_cover").className = "";
+			document.getElementById("modal_" + modalId).className = "";
+		}
+
+		document.getElementById("login_button").addEventListener("click", login);
+		document.getElementById("create_room_button").addEventListener("click", createRoom);
+		document.getElementById("create_new_room").addEventListener("click", launchModal.bind(this, "create_room"));
+		document.getElementById("shadow_cover").addEventListener("click", closeModal);
+		document.getElementById("submit_message_button").addEventListener("click", submitMessage);
+
+		[].forEach.call(document.querySelectorAll("form"), function(el) {
+			el.addEventListener("submit", function(e) {
+				e.preventDefault();
+			});
+		});
+	</script>
+</html>
