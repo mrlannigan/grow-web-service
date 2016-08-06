@@ -145,30 +145,30 @@
 			#chat_room {
 			  padding: 100px;
 			}
-			#chat_room .user_list, #chat_room .main, #chat_room .user_functions {
+			#chat_room .sidebar_el, #chat_room .main {
 			  float: left;
 			}
-			#chat_room .user_functions {
-				margin-top: 1em;
-			}
-			#chat_room .user_list, #chat_room .user_functions {
+			#chat_room .sidebar_el {
 			  width: 20%;
 			  background: white;
 			  padding: 25px;
 			  border-radius: 5px;
 			}
-			#chat_room .user_list .header {
+			#chat_room .sidebar_el:not(:last-of-type) {
+				margin-bottom: 1em;
+			}
+			#chat_room .sidebar_el .header {
 			  font-size: 20px;
 			  margin-bottom: 15px;
 			}
-			#chat_room .user_list li, #chat_room .user_functions li {
+			#chat_room .sidebar_el li {
 			  text-overflow: ellipsis;
 			  overflow: hidden;
 			  width: 100%;
 			  line-height: 20px;
 			  font-style: italic;
 			}
-			#chat_room .user_list li:not(:last-of-type), #chat_room .user_functions li:not(:last-of-type) {
+			#chat_room .sidebar_el li:not(:last-of-type) {
 			  margin-bottom: 5px;
 			}
 			#chat_room .main {
@@ -304,15 +304,23 @@
 					<button id="submit_message_button">Submit</button>
 				</form>
 			</div>
-			<ul class="user_list">
+			<ul class="user_list sidebar_el">
 				<div class="header">Chatters</div>
-				<li class="user_list_item">Ricky W.</li>
+				<!-- <li class="user_list_item">Ricky W.</li>
 				<li class="user_list_item">Brian W.</li>
-				<li class="user_list_item">Nathan W.</li>
+				<li class="user_list_item">Nathan W.</li> -->
 			</ul>
 
-			<ul class="user_functions">
+			<ul class="user_functions sidebar_el">
 				<li class="user_function_item"><button id="user_logout">Logout</button></li>
+			</ul>
+
+			<ul class="user_help sidebar_el">
+				<div class="header">Help</div>
+				<li class="user_help">/join [room]</li>
+				<li class="user_help">/leave [room]</li>
+				<li class="user_help">/search [term(s)]</li>
+				<li class="user_help">/giphy [term(s)]</li>
 			</ul>
 		</div>
 	</body>

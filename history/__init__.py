@@ -18,6 +18,9 @@ class History(object):
             'timestamp': timestamp
         }
 
+        if kwargs.has_key('html'):
+            msg['html'] = kwargs.get('html')
+
         res = es.index(index='messages', doc_type=msg['room'], id=msg['message_id'], body=msg);
 
     def getRoomMessages(self, room, date=None, count=50):

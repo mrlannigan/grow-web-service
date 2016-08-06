@@ -1,8 +1,9 @@
-from flask import session, request
-from flask_socketio import send, emit, join_room, leave_room
 import auth
 import re
 import urllib
+import safygiphy
+from flask import session, request
+from flask_socketio import send, emit, join_room, leave_room
 from datetime import datetime
 from uuid import uuid4
 from people import roomMgmt
@@ -11,6 +12,7 @@ from history import History
 
 class ChatCmds():
     quickCheck = re.compile(pattern='^\/(.+)')
+    giphyObj = safygiphy.Giphy()
 
     def __init__(self):
         self.cmds = self.compile()
@@ -19,6 +21,15 @@ class ChatCmds():
         chatCmds = [{
             'regex': re.compile(pattern='^\/search (.+)$'),
             'func': 'search'
+        }, {
+            'regex': re.compile(pattern='^\/join (.+)$'),
+            'func': 'joinRoom'
+        }, {
+            'regex': re.compile(pattern='^\/leave (.+)$'),
+            'func': 'leaveRoom'
+        }, {
+            'regex': re.compile(pattern='^\/giphy (.+)$'),
+            'func': 'giphy'
         }]
 
         return chatCmds
@@ -49,6 +60,60 @@ class ChatCmds():
             'cmd': 'historySearch',
             'uri': '/api/v1/history/search/{}/{}'.format(urllib.quote(data['room']), urllib.quote(match.group(1)))
         }
+
+        return ret
+
+    def joinRoom(self, match, data):
+        ret = {'send': False}
+
+        ret['data'] = {
+            'cmd': 'joinRoom',
+            'room': match.group(1)
+        }
+
+        return ret
+
+    def leaveRoom(self, match, data):
+        ret = {'send': False}
+
+        ret['data'] = {
+            'cmd': 'leaveRoom',
+            'room': match.group(1)
+        }
+
+        if ret['data']['room'] == 'Global':
+            ret['data']['room'] = None
+            ret['data']['error'] = 'Can\'t leave the global room.'
+
+        return ret
+
+    def search(self, match, data):
+        ret = {'send': False}
+
+        ret['data'] = {
+            'cmd': 'historySearch',
+            'uri': '/api/v1/history/search/{}/{}'.format(urllib.quote(data['room']), urllib.quote(match.group(1)))
+        }
+
+        return ret
+
+    def giphy(self, match, data):
+        ret = {'send': True}
+
+        try:
+            gif = self.giphyObj.random(tag=match.group(1))
+
+            ret['data'] = {
+                'message': '',
+                'html': '<iframe src="//giphy.com/embed/{}?html5=true" width="480" height="360" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>'.format(gif['data']['id'])
+            }
+        except Exception as e:
+            print e
+            ret['send'] = False
+            ret['data'] = {
+                'cmd': 'notification',
+                'message': 'Unable to get a gif'
+            }
 
         return ret
 
@@ -85,6 +150,9 @@ def setupSocketIO(socketio):
         control = cmds.process(message)
 
         if control.get('send', True):
+            if control.has_key('data'):
+                message.update(control['data'])
+
             hs.writeMessageToRoom(**message)
             emit('chat_recv', message, room=roomName)
         else:

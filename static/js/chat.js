@@ -16,6 +16,20 @@ var chat = {
       }).then(function (xhr) {
         historyMgmt.showChatHistorySearch(xhr.json);
       })
+    },
+    joinRoom: function (data) {
+      roomMgmt.uiAddRoom(data.room);
+    },
+    leaveRoom: function (data) {
+      if (!data.room && data.error) {
+        var msg = {};
+
+        msg.message = data.error;
+        msg.room = roomMgmt.activeRoom;
+
+        return roomMgmt.handleNewMessage(msg.room, msg);
+      }
+      roomMgmt.uiLeaveRoom(data.room);
     }
   },
 
@@ -36,8 +50,10 @@ var chat = {
     chattersMgmt.updateConnectedList();
 
     conn.on('chat_recv', chat.handleChatRecv.bind(chat));
-
     conn.on('chat_cmd', chat.handleChatCmd.bind(chat));
+
+    conn.on('room_join', chat.handleRoomJoin.bind(chat));
+    conn.on('room_leave', chat.handleRoomLeave.bind(chat));
 
     return Promise.resolve();
   },
@@ -84,7 +100,9 @@ var chat = {
       data.timestamp = new Date(data.timestamp);
     }
 
-    chat.log[room].push(data);
+    if (!(data.hasOwnProperty('persist') && data.persist === false)) {
+      chat.log[room].push(data);
+    }
     roomMgmt.handleNewMessage(room, data);
   },
 
@@ -92,6 +110,24 @@ var chat = {
     if (chat.cmds.hasOwnProperty(data.cmd)) {
       chat.cmds[data.cmd].call(chat, data);
     }
+  },
+
+  handleRoomJoin: function (data) {
+    var msg = {};
+
+    msg.message = data.user.name + ' joined the room';
+    msg.room = data.room
+
+    roomMgmt.handleNewMessage(data.room, msg);
+  },
+
+  handleRoomLeave: function (data) {
+    var msg = {};
+
+    msg.message = data.name + ' left the room';
+    msg.room = data.room
+
+    roomMgmt.handleNewMessage(data.room, msg);
   },
 
   sendChatMessage: function (message) {

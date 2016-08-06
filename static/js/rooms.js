@@ -47,6 +47,29 @@ var roomMgmt = {
     return chat.getRoomHistory(roomName, noActive);
   },
 
+  uiLeaveRoom: function (roomName) {
+    if (!roomName || !roomMgmt.uiRoomExists(roomName)) {
+      return Promise.resolve();
+    }
+
+    var roomContainer = document.querySelector('.current_rooms_list')
+      selector = roomContainer.querySelectorAll('.current_rooms_list_item');
+
+    [].forEach.call(selector, function(element) {
+      if (element.getAttribute('data-roomname') === roomName) {
+        roomContainer.removeChild(element);
+      }
+    });
+
+    if (roomMgmt.activeRoom === roomName) {
+      roomMgmt.setActiveRoom('Global');
+    }
+
+    roomMgmt.leaveRoom(roomName);
+
+    return Promise.resolve();
+  },
+
   uiRoomExists: function (roomName) {
 
     var list = [];
@@ -117,32 +140,43 @@ var roomMgmt = {
   createDOMForMessage: function (data) {
 
     var li = document.createElement('li'),
-      avatar = document.createElement('div'),
+      avatar,
       message = document.createElement('div'),
-      user = document.createElement('div');
+      user;
 
     // user
-    user.className = 'user';
-    user.innerHTML = data.name + ' at ' + moment(data.timestamp).format('MMM D LTS');
+    if (data.name && data.timestamp) {
+      user = document.createElement('div');
+      user.className = 'user';
+      user.innerHTML = data.name + ' at ' + moment(data.timestamp).format('MMM D LTS');
+
+      li.setAttribute('data-user', data.name.replace(' ', '_'));
+      li.setAttribute('data-timestamp', data.timestamp);
+    }
 
     // message
     message.className = 'message';
-    message.innerText = data.message;
+    if (data.html) {
+      message.innerHTML = data.html;
+    } else {
+      message.innerText = data.message;
+    }
 
     // avatar
-    avatar.className = 'avatar';
-    avatar.style.backgroundImage = 'url("' + data.picture + '?sz=46")'
+    if (data.picture) {
+      avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.style.backgroundImage = 'url("' + data.picture + '?sz=46")'
+    }
 
     // li
     li.className = 'messages_list_item';
-    li.setAttribute('data-user', data.name.replace(' ', '_'));
     li.setAttribute('data-messageid', data.message_id || 'noidgiven');
     li.setAttribute('data-room', data.room);
-    li.setAttribute('data-timestamp', data.timestamp);
 
-    li.appendChild(avatar);
+    if (avatar) { li.appendChild(avatar); }
     li.appendChild(message);
-    li.appendChild(user);
+    if (user) { li.appendChild(user); }
 
     return li;
   },
