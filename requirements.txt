@@ -1,1 +1,7 @@
 flask
+requests
+flask_socketio
+eventlet
+redis
+gevent
+elasticsearch>=2.0.0,<3.0.0

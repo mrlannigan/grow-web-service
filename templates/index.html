@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 
 <html>
 	<head>
 		<title>Grow developer test</title>
 		<meta name="description" content="Grow developer test" />
+		<meta name="google-signin-client_id" content="158943368378-s5os4rndgdub7c0qp9n1pjl1kskrpq69.apps.googleusercontent.com">
 		<style>
 			body {
 			  background: #efeeea;
@@ -83,6 +83,50 @@
 			  padding: 0 10px;
 			  margin-right: 5px;
 			}
+			[id^="modal"] .center-children > div {
+			  margin: 0 auto;
+			}
+
+			#modal_chat_search {
+				height: 40vh;
+				padding: 0;
+			}
+			#modal_chat_search ul {
+			  overflow: scroll;
+			  height: 100%;
+				padding: 15px;
+			}
+			#modal_chat_search .messages_list_item {
+			  white-space: nowrap;
+			  position: relative;
+				text-align: left;
+			}
+			#modal_chat_search .messages_list_item .avatar {
+			  width: 40px;
+			  height: 40px;
+			  border-radius: 50%;
+			  position: absolute;
+			  background-image: url("https://lh6.googleusercontent.com/-donwm0Gzz4o/AAAAAAAAAAI/AAAAAAAACH8/k0Yv6D2ynz4/s46-c-k-no/photo.jpg");
+			}
+			#modal_chat_search .messages_list_item .avatar, #modal_chat_search .messages_list_item .message {
+			  display: inline-block;
+			  vertical-align: top;
+			}
+			#modal_chat_search .messages_list_item .user {
+			  font-style: italic;
+			  color: #9a9089;
+			  font-size: 12px;
+			  margin-left: 55px;
+			}
+			#modal_chat_search .messages_list_item .message {
+			  width: calc(100% - 40px);
+			  padding-left: 55px;
+			  white-space: normal;
+			  margin-bottom: 5px;
+			}
+			#modal_chat_search .messages_list_item:not(:last-of-type) {
+			  margin-bottom: 25px;
+			}
 
 			#shadow_cover {
 			  position: fixed;
@@ -101,10 +145,13 @@
 			#chat_room {
 			  padding: 100px;
 			}
-			#chat_room .user_list, #chat_room .main {
+			#chat_room .user_list, #chat_room .main, #chat_room .user_functions {
 			  float: left;
 			}
-			#chat_room .user_list {
+			#chat_room .user_functions {
+				margin-top: 1em;
+			}
+			#chat_room .user_list, #chat_room .user_functions {
 			  width: 20%;
 			  background: white;
 			  padding: 25px;
@@ -114,14 +161,14 @@
 			  font-size: 20px;
 			  margin-bottom: 15px;
 			}
-			#chat_room .user_list li {
+			#chat_room .user_list li, #chat_room .user_functions li {
 			  text-overflow: ellipsis;
 			  overflow: hidden;
 			  width: 100%;
 			  line-height: 20px;
 			  font-style: italic;
 			}
-			#chat_room .user_list li:not(:last-of-type) {
+			#chat_room .user_list li:not(:last-of-type), #chat_room .user_functions li:not(:last-of-type) {
 			  margin-bottom: 5px;
 			}
 			#chat_room .main {
@@ -215,7 +262,7 @@
 	<body>
 		<div id="shadow_cover"></div>
 		<div id="modal_login">
-			<button id="login_button">Login</button>
+			<div id="login_button" class="center-children"></div>
 		</div>
 		<div class="hidden" id="modal_create_room">
 			<form id="create_room_form">
@@ -223,15 +270,24 @@
 				<button type="submit" id="create_room_button">Create</button>
 			</form>
 		</div>
+		<div class="hidden" id="modal_chat_search">
+			<ul class="messages_list">
+				<li class="messages_list_item" data-user="Ricky">
+					<div class="avatar"></div>
+					<div class="message">Hey Nathan!</div>
+					<div class="user">Ricky W.</div>
+				</li>
+			</ul>
+		</div>
 		<div class="hidden" id="chat_room">
 			<div class="main">
 				<ul class="current_rooms_list">
-					<li class="current_rooms_list_item active">Global</li>
+					<!-- <li class="current_rooms_list_item active" onclick="roomMgmt.uiRoomClick()">Global</li> -->
 					<li id="create_new_room" class="current_rooms_list_item">+</li>
 				</ul>
 				<div class="messages_window">
 					<ul class="messages_list">
-						<li class="messages_list_item" data-user="Nathan">
+						<!-- <li class="messages_list_item" data-user="Nathan">
 							<div class="avatar"></div>
 							<div class="message">Hey Ricky!</div>
 							<div class="user">Nathan W.</div>
@@ -240,7 +296,7 @@
 							<div class="avatar"></div>
 							<div class="message">Hey Nathan!</div>
 							<div class="user">Ricky W.</div>
-						</li>
+						</li> -->
 					</ul>
 				</div>
 				<form id="submit_message_form" class="entry_field">
@@ -254,58 +310,67 @@
 				<li class="user_list_item">Brian W.</li>
 				<li class="user_list_item">Nathan W.</li>
 			</ul>
+
+			<ul class="user_functions">
+				<li class="user_function_item"><button id="user_logout">Logout</button></li>
+			</ul>
 		</div>
 	</body>
+
+	<script src="https://apis.google.com/js/platform.js?onload=googleLoaded" async defer></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.4.1/bluebird.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script> -->
+
+	<script src="/static/js/util.js"></script>
+	<script src="/static/js/google.js"></script>
+	<script src="/static/js/user.js"></script>
+	<script src="/static/js/token.js"></script>
+	<script src="/static/js/chat.js"></script>
+	<script src="/static/js/chatters.js"></script>
+	<script src="/static/js/rooms.js"></script>
+	<script src="/static/js/history.js"></script>
+
 	<script>
 		// candidate will need to modify the following functions
-		var login = function() {
+		var login = function(googleUser) {
 
-			loginComplete();
-		}
+			var token = tokenMgmt.getLocalAccessToken(),
+				ok;
 
-		var createRoom = function() {
+			if (!token) {
+				ok = tokenMgmt.getRemoteAccessToken(googleUser.getAuthResponse().id_token);
+			} else {
+				ok = Promise.resolve();
+			}
 
-			createRoomComplete();
-		}
+			ok = ok.then(function () {
+				return chat.createConnection();
+			})
+
+			return ok.then(loginComplete);
+		};
 
 		var submitMessage = function() {
 
 			submitMessageComplete();
-		}
+		};
+
 
 		// candididate will call the following functions
 		var loginComplete = function() {
 			document.getElementById("chat_room").className = "";
 			closeModal();
-		}
 
-		var createRoomComplete = function() {
-			var roomName = document.getElementById("create_room_form").querySelector("input").value;
-
-			[].forEach.call(document.querySelectorAll(".current_rooms_list_item"), function(element) {
-				element.className = "current_rooms_list_item";
-			});
-			document.getElementById("create_new_room").insertAdjacentHTML("beforebegin", "<li class='current_rooms_list_item active'>" + roomName + "</li>");
-			closeModal();
+			return Promise.resolve();
 		}
 
 		var submitMessageComplete = function() {
-			var message = document.getElementById("submit_message_form").querySelector("input").value;
+			var message = document.getElementById("submit_message_form").querySelector("input");
 
-			// stub
-			var user = {
-				name: "Candidate X."
-			}
-
-			document.getElementById("chat_room").querySelector(".messages_list").insertAdjacentHTML("beforeend",
-				"<li class='messages_list_item' data-user='" +
-					user.name.replace(" ", "_") +
-				"'><div class='avatar'></div><div class='message'>" +
-					message +
-				"</div><div class='user'>" +
-					user.name +
-				"</div></li>"
-			);
+			chat.sendChatMessage(message.value);
+			message.value = '';
 		}
 
 		// candidate can ignore everything below
@@ -319,8 +384,9 @@
 			document.getElementById("modal_" + modalId).className = "";
 		}
 
-		document.getElementById("login_button").addEventListener("click", login);
-		document.getElementById("create_room_button").addEventListener("click", createRoom);
+		// document.getElementById("login_button").addEventListener("click", login);
+		document.getElementById("user_logout").addEventListener("click", userMgmt.userLogout);
+		document.getElementById("create_room_button").addEventListener("click", roomMgmt.createRoomFromModal);
 		document.getElementById("create_new_room").addEventListener("click", launchModal.bind(this, "create_room"));
 		document.getElementById("shadow_cover").addEventListener("click", closeModal);
 		document.getElementById("submit_message_button").addEventListener("click", submitMessage);
