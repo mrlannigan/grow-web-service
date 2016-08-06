@@ -25,7 +25,7 @@ class ChatCmds():
             'regex': re.compile(pattern='^\/join (.+)$'),
             'func': 'joinRoom'
         }, {
-            'regex': re.compile(pattern='^\/leave (.+)$'),
+            'regex': re.compile(pattern='^\/leave ?(.+)?$'),
             'func': 'leaveRoom'
         }, {
             'regex': re.compile(pattern='^\/giphy (.+)$'),
@@ -79,9 +79,13 @@ class ChatCmds():
         ret = {'send': False}
 
         ret['data'] = {
-            'cmd': 'leaveRoom',
-            'room': match.group(1)
+            'cmd': 'leaveRoom'
         }
+
+        if match.group(1):
+            ret['data']['room'] = match.group(1)
+        else:
+            ret['data']['room'] = data['room']
 
         if ret['data']['room'] == 'Global':
             ret['data']['room'] = None
