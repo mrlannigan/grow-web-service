@@ -18,7 +18,7 @@ var chat = {
       })
     },
     joinRoom: function (data) {
-      roomMgmt.uiAddRoom(data.room);
+      roomMgmt.createRoom(data.room);
     },
     leaveRoom: function (data) {
       if (!data.room && data.error) {

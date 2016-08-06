@@ -45,7 +45,9 @@ class ChatCmds():
         for check in self.cmds:
             match = check['regex'].search(message)
             if match:
+                print 'CHATCMD: Running {} command'.format(check['func'])
                 ret = self[check['func']](match, data)
+                print 'CHATCMD: Ran {} command with the following result:{}'.format(check['func'], ret)
                 break
 
         return ret
@@ -105,7 +107,7 @@ class ChatCmds():
 
             ret['data'] = {
                 'message': '',
-                'html': '<iframe src="//giphy.com/embed/{}?html5=true" width="480" height="360" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>'.format(gif['data']['id'])
+                'html': '<img src="{}" width="{}" height="{}" class="giphy-embed"/>'.format(gif['data']['image_url'], gif['data']['image_width'], gif['data']['image_height'])
             }
         except Exception as e:
             print e
