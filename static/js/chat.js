@@ -145,6 +145,15 @@ var chat = {
       var msgs,
         cacheIds = [];
 
+      if (!xhr.json) {
+        if (!noActive) {
+          roomMgmt.activeRoom = null;
+          return roomMgmt.setActiveRoom(roomName);
+        }
+
+        return;
+      }
+
       msgs = xhr.json.map(function (msg) {
         if (msg.hasOwnProperty('timestamp')) {
           msg.timestamp = new Date(msg.timestamp);
